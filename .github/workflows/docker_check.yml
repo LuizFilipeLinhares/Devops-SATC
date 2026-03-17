@@ -20,4 +20,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASS }}
 
       - name: Build Docker image
-        run: docker build -t linharesluiz/satc-Devops:0.0.1 .
+        run: docker build -t linharesluiz/satc-devops:0.0.1 .
