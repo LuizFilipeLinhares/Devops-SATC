@@ -70,7 +70,7 @@ jobs:
       - name: Falhar se houver mais de 2 vulnerabilidades médias (SonarCloud)
         run: |
           COUNT=$(curl -s -u "${SONAR_TOKEN}:" \
-            "https://sonarcloud.io/api/issues/search?componentKeys=${PROJECT_KEY}&types=VULNERABILITY&severities=MAJOR&resolved=false&ps=1" \
+            "https://sonarcloud.io/api/issues/search?componentKeys=${PROJECT_KEY}&branch=develop&types=VULNERABILITY&severities=MAJOR&resolved=false&ps=1" \
             | jq '.total')
 
           echo "Quantidade de vulnerabilidades médias: $COUNT"
