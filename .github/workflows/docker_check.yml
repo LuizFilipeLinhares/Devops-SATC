@@ -62,10 +62,10 @@ jobs:
               echo "Pipeline bloqueada: mais de 2 vulnerabilidades médias encontradas."
               exit 1
             fi
-          else
-            echo "Arquivo de resultados do Trivy não encontrado."
-            exit 1
-          fi
+            else
+              echo "Arquivo de resultados do Trivy não encontrado."
+              exit 1
+            fi
 
       - name: Falhar se houver mais de 2 vulnerabilidades médias (SonarCloud)
         run: |
