@@ -25,19 +25,60 @@ jobs:
       - name: Build Docker image
         run: docker build -t linharesluiz/satc-devops:0.0.1 .
 
-  sonarcloud:
-      name: Run SonarCloud
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v5.0.0
-          with:
-            fetch-depth: 0  
-        - name: Setup Node.js environment
-          uses: actions/setup-node@v6.0.0
-          with:
-            node-version: 22 
-        - name: SonarCloud Scan
-          uses: SonarSource/sonarqube-scan-action@v6.0.0    
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.ORGANIZATION_KEY }}
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: 'docker.io/usuario/satc-devops:0.0.2'
+          format: json
+          output: trivy-results.json
+          severity: MEDIUM,HIGH,CRITICAL
+
+      - name: Upload Trivy results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results.json
+          path: trivy-results.json
+
+      - name: Analyze Trivy results
+        run: |
+          if [ -f trivy-results.json ]; then
+            VULN_COUNT=$(jq '[.Results[].Vulnerabilities[] | select(.Severity == "MEDIUM")] | length' trivy-results.json)
+            echo "Quantidade de vulnerabilidades médias: $VULN_COUNT"
+
+            if [ "$VULN_COUNT" -gt 2 ]; then
+              echo "Pipeline bloqueada: mais de 2 vulnerabilidades médias encontradas."
+              exit 1
+            fi
+          else
+            echo "Arquivo de resultados do Trivy não encontrado."
+            exit 1
+          fi
+
+      - name: Falhar se houver mais de 2 vulnerabilidades médias (SonarCloud)
+        run: |
+          COUNT=$(curl -s -u "${SONAR_TOKEN}:" \
+            "https://sonarcloud.io/api/issues/search?componentKeys=${PROJECT_KEY}&types=VULNERABILITY&severities=MAJOR&resolved=false&ps=1" \
+            | jq '.total')
+
+          echo "Quantidade de vulnerabilidades médias: $COUNT"
+
+          if [ "$COUNT" -gt 2 ]; then
+            echo "Pipeline bloqueada: mais de 2 vulnerabilidades médias encontradas."
+            exit 1
+          fi
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          PROJECT_KEY: ${{ secrets.PROJECT_KEY }}
