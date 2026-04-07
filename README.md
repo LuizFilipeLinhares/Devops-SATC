@@ -97,5 +97,5 @@ Você pode fazer deploy facilmente em:
 
 Este projeto é apenas para fins educacionais e demonstração de front-end.
 
-© 2026 Luiz Filipe Linhares. Todos os direitos reservados.
+© 2026 Luiz Filipe Linhares. Todos os direitos reservados..
 
