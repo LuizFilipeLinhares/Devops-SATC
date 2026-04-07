@@ -25,19 +25,19 @@ jobs:
       - name: Build Docker image
         run: docker build -t linharesluiz/satc-devops:0.0.1 .
 
-sonarcloud:
-    name: Run SonarCloud
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5.0.0
-        with:
-          fetch-depth: 0  
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v6.0.0
-        with:
-          node-version: 22 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6.0.0    
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  sonarcloud:
+      name: Run SonarCloud
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v5.0.0
+          with:
+            fetch-depth: 0  
+        - name: Setup Node.js environment
+          uses: actions/setup-node@v6.0.0
+          with:
+            node-version: 22 
+        - name: SonarCloud Scan
+          uses: SonarSource/sonarqube-scan-action@v6.0.0    
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
