@@ -33,6 +33,7 @@ jobs:
             -Dsonar.organization=luizfilipelinhares
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=.
+            -Dsonar.qualitygate.wait=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -46,11 +47,11 @@ jobs:
       - name: Analyze Trivy results
         run: |
           if [ -f trivy-results.json ]; then
-            VULN_COUNT=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy-results.json)
-            echo "Quantidade de vulnerabilidades medias: $VULN_COUNT"
+            VULN_COUNT=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-results.json)
+            echo "Vulnerabilidades críticas/altas: $VULN_COUNT"
 
-            if [ "$VULN_COUNT" -gt 10 ]; then
-              echo "Pipeline bloqueada: mais de 10 vulnerabilidades medias encontradas."
+            if [ "$VULN_COUNT" -gt 5 ]; then
+              echo "Pipeline bloqueada: muitas vulnerabilidades críticas."
               exit 1
             fi
           else
@@ -61,15 +62,14 @@ jobs:
       - name: Validar vulnerabilidades no SonarCloud
         run: |
           COUNT=$(curl -s -u "${SONAR_TOKEN}:" \
-            "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&types=VULNERABILITY&severities=MAJOR&resolved=false&ps=1" \
+            "https://sonarcloud.io/api/issues/search?componentKeys=LuizFilipeLinhares_Devops-SATC&types=VULNERABILITY&severities=CRITICAL&resolved=false&ps=1" \
             | jq '.total')
 
-          echo "Quantidade de vulnerabilidades medias: $COUNT"
+          echo "Vulnerabilidades críticas no Sonar: $COUNT"
 
-          if [ "$COUNT" -gt 10 ]; then
-            echo "Pipeline bloqueada: mais de 10 vulnerabilidades medias encontradas."
+          if [ "$COUNT" -gt 5 ]; then
+            echo "Pipeline bloqueada: muitas vulnerabilidades críticas."
             exit 1
           fi
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: LuizFilipeLinhares_Devops-SATC
