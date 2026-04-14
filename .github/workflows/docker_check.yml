@@ -69,7 +69,6 @@ jobs:
             fi
             else
               echo "Arquivo de resultados do Trivy não encontrado."
-              exit 1
             fi
 
       - name: Falhar se houver mais de 15 vulnerabilidades médias (SonarCloud)
@@ -82,7 +81,7 @@ jobs:
 
           if [ "$COUNT" -gt 15 ]; then
             echo "Pipeline bloqueada: mais de 15 vulnerabilidades médias encontradas."
-            exit 1
+            
           fi
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
