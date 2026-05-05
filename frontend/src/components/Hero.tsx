@@ -2,7 +2,8 @@ const Hero = () => {
   return (
     <section className="hero">
       <div className="container">
-        <h1>Construa o Futuro com Nossa Plataforma</h1>
+        <h1>Luiz Filipe Linhares</h1>
+        <h2>Construa o Futuro com Nossa Plataforma</h2>
         <p>
           Uma solução moderna para acelerar seu negócio e escalar seus
           resultados.
